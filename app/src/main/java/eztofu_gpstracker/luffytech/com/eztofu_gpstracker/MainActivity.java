@@ -1,5 +1,6 @@
 package eztofu_gpstracker.luffytech.com.eztofu_gpstracker;
 
+import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -16,9 +17,6 @@ import android.widget.CompoundButton;
 import android.widget.Switch;
 import android.widget.Toast;
 
-import java.lang.ref.WeakReference;
-
-
 public class MainActivity extends ActionBarActivity {
 
 
@@ -30,11 +28,21 @@ public class MainActivity extends ActionBarActivity {
         setContentView(R.layout.activity_main);
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, new PlaceholderFragment(this))
+                    .add(R.id.container, new PlaceholderFragment())
                     .commit();
         }
 
         mLocalBroadcastManager = LocalBroadcastManager.getInstance(this);
+    }
+
+    private boolean isGpsServiceRunning() {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (GPSTrackingService.class.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void startGpsTrackService() {
@@ -99,12 +107,10 @@ public class MainActivity extends ActionBarActivity {
     /**
      * A placeholder fragment containing a simple view.
      */
-    public static class PlaceholderFragment extends Fragment {
+    public class PlaceholderFragment extends Fragment {
 
         private Switch mGpsSwitch;
-        WeakReference<MainActivity> mActivityRef;
-        public PlaceholderFragment(MainActivity activity) {
-            mActivityRef = new WeakReference<MainActivity>(activity);
+        public PlaceholderFragment() {
         }
 
         @Override
@@ -112,18 +118,15 @@ public class MainActivity extends ActionBarActivity {
                                  Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_main, container, false);
             mGpsSwitch = (Switch) rootView.findViewById(R.id.gps_switch);
+            boolean isServiceRunning = MainActivity.this.isGpsServiceRunning();
+            mGpsSwitch.setChecked(isServiceRunning);
             mGpsSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    MainActivity activity = mActivityRef.get();
-                    if (activity == null) {
-                        return;
-                    }
-
                     if (isChecked) {
-                        activity.startGpsTrackService();
+                        MainActivity.this.startGpsTrackService();
                     } else {
-                        activity.stopGpsTrackService();
+                        MainActivity.this.stopGpsTrackService();
                     }
                 }
             });
