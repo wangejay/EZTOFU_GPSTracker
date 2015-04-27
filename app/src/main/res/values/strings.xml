@@ -2,4 +2,8 @@
     <string name="app_name">EZTOFU_GPSTracker</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string name="gps_tracker">GPS Tracker</string>
+    <string name="no_google_play">Google Play service is not installed</string>
+    <string name="no_network">No network connection, please enable network connection</string>
+    <string name="cannot_connect_server">Couldn\'t connect to server</string>
 </resources>
